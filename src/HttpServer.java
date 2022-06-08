@@ -6,7 +6,7 @@ import java.net.Socket;
  * @author Hugo COLLIN 20220529
  * Note : Fonctionne avec le port 80, mais réponse invalide avec un port personnalisé (ne lance pas d'exception)
  */
-public class HttpServerHugo
+public class HttpServer
 {
     public static final String SITE_PATH = "ressource" + File.separator;
     public static final String IMG_PATH = SITE_PATH + "images" + File.separator;
