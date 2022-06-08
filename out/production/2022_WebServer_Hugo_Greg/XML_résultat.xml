@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Documentation>
+    <Site Wiki="Wikibooks">
+        <Livre Wikilivre="Java">
+            <Page1>Introduction</Page1>
+            <Page2>Bases du langage</Page2>
+            <Exemple>XML</Exemple>
+        </Livre>
+    </Site>
+</Documentation>

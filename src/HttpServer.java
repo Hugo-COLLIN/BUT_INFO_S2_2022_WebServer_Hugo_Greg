@@ -1,10 +1,13 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javax.xml.parsers.*;
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * @author Hugo COLLIN 20220529
- * Note : Fonctionne avec le port 80, mais réponse invalide avec un port personnalisé (ne lance pas d'exception)
  */
 public class HttpServer
 {
@@ -13,8 +16,13 @@ public class HttpServer
 
 
     public static void main(String[] args) {
+
+
         try
         {
+            //XML launch
+            //JAXBContext
+
             int port = setPort(args);
 
             BufferedReader fromClient;

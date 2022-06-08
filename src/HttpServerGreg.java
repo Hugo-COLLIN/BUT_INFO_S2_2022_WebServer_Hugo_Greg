@@ -7,6 +7,8 @@ public class HttpServerGreg {
     public static final String RESSOURCEPATH = "ressource" + File.separator;
 
     public static void main(String[] args) throws IOException {
+
+
         // Initialisation du port
         int port;
         try {
