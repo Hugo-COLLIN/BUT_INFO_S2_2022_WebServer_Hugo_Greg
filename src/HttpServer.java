@@ -8,10 +8,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import javax.xml.parsers.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * @author Hugo COLLIN 20220529
@@ -140,7 +136,7 @@ public class HttpServer
         return res;
     }
 
-    public void readXML(String path) {
+    public void readXML(String path) throws Exception {
         File file = new File(path);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
