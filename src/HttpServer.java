@@ -57,7 +57,7 @@ public class HttpServer {
                 fis = new FileInputStream(RESSOURCEPATH + folder);
 
                 byte[] fileBytes = fis.readAllBytes();
-                //if (folder.contains("html"))
+                if (folder.contains("html"))
                     out.write("HTTP/1.1 200 OK".getBytes());
                 out.write(fileBytes);
                 out.flush();

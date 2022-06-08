@@ -8,7 +8,7 @@ import java.net.Socket;
  */
 public class HttpServerHugo
 {
-    public static final String SITE_PATH = "site" + File.separator;
+    public static final String SITE_PATH = "ressource" + File.separator;
     public static final String IMG_PATH = SITE_PATH + "images" + File.separator;
 
 
