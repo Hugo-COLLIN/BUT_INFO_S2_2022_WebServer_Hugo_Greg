@@ -1,7 +1,10 @@
+import org.w3c.dom.Document;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -9,6 +12,10 @@ public class XML_Creation_SAX
 {
     public static void main(String[] args) {
         try {
+            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = documentBuilder.parse("src/myweb.conf");
+            System.out.println(document.getDocumentElement().getTextContent());
+            /*
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser parser = factory.newSAXParser();
             parser.parse("src/myweb.conf", new DefaultHandler() {
@@ -32,6 +39,8 @@ public class XML_Creation_SAX
                     System.out.println("\nendElement");
                 }
             });
+
+             */
         }
         catch (Exception e)
         {

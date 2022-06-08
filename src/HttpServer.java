@@ -2,9 +2,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -23,8 +25,7 @@ public class HttpServer
     public static void main(String[] args) {
         try
         {
-            //XML launch
-            //JAXBContext
+            List<String> webConf = readXML("myweb.conf");
 
             int port = setPort(args);
 
@@ -67,6 +68,10 @@ public class HttpServer
                 System.out.println("Connexion closed with " + cliAdr);
             }
         }
+        catch (ParserConfigurationException | SAXException e)
+        {
+            System.out.println("XML reading error");
+        }
         catch (IOException e)
         {
             System.out.println("In-Out error");
@@ -104,9 +109,6 @@ public class HttpServer
         return path;
     }
 
-
-
-
     private static boolean accessFile(String path, OutputStream os)
     {
         FileInputStream fis;
@@ -136,8 +138,7 @@ public class HttpServer
         return res;
     }
 
-    public List<String> readXML(String path) throws Exception
-    {
+    public static List<String> readXML(String path) throws ParserConfigurationException, IOException, SAXException {
         List<String> xmlData = new ArrayList<>();
         File file = new File(path);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
