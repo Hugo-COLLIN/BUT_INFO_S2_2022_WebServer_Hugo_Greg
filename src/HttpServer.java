@@ -22,7 +22,8 @@ public class HttpServer
     public static String sitePath;
     public static String imgPath;
     public static boolean isIndex;
-    public static List<String> acceptList, rejectList;
+    public static List<String> acceptIPList, rejectIPList;
+    public static List<Integer> acceptMaskList, rejectMaskList;
 
 
     public static void main(String[] args) {
@@ -33,7 +34,7 @@ public class HttpServer
             //int port = setPort(args);
 
             readXML("src/myweb.conf");
-            System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptList + "\n" + rejectList);
+            System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList + "\n" + acceptMaskList + "\n" + rejectMaskList);
 
             BufferedReader fromClient;
             OutputStream toClient;
@@ -183,26 +184,34 @@ public class HttpServer
                     System.out.println("No index state defined, set to false.");
                 }
 
-                NodeList accepts = element.getElementsByTagName("accepts");
-                acceptList = new ArrayList<>();
+
+                NodeList accepts = element.getElementsByTagName("accept");
+                acceptIPList = new ArrayList<>();
+                acceptMaskList = new ArrayList<>();
                 for (int j = 0 ; j < accepts.getLength() ; j ++)
                     try {
-                        acceptList.add(accepts.item(j).getTextContent());
+                        String [] tmp = accepts.item(j).getTextContent().split("/");
+                        acceptIPList.add(tmp[0]);
+                        acceptMaskList.add(Integer.parseInt(tmp[1]));
                     }
                     catch (NullPointerException e)
                     {
                         System.out.println("No accepted IPs defined");
                     }
 
-                NodeList rejects = element.getElementsByTagName("rejects");
-                rejectList = new ArrayList<>();
-                for (int j = 0 ; j < accepts.getLength() ; j ++)
+                NodeList rejects = element.getElementsByTagName("reject");
+                rejectIPList = new ArrayList<>();
+                rejectMaskList = new ArrayList<>();
+                for (int j = 0 ; j < rejects.getLength() ; j ++)
                     try {
-                        rejectList.add(rejects.item(j).getTextContent());
+                        String [] tmp = rejects.item(j).getTextContent().split("/");
+                        rejectIPList.add(tmp[0]);
+                        rejectMaskList.add(Integer.parseInt(tmp[1]));
                     }
                     catch (NullPointerException e)
                     {
                         System.out.println("No rejected IPs defined");
+                        e.printStackTrace();
                     }
             }
         }
