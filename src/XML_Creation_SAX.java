@@ -12,6 +12,7 @@ public class XML_Creation_SAX
 {
     public static void main(String[] args) {
         try {
+            /*
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = documentBuilder.parse("src/myweb.conf");
             System.out.println(document.getDocumentElement().getTextContent());

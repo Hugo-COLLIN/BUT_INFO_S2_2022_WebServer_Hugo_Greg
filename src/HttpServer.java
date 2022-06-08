@@ -14,20 +14,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Hugo COLLIN 20220529
+ * @author Hugo COLLIN 20220608
  */
 public class HttpServer
 {
-    public static final String SITE_PATH = "ressource" + File.separator;
-    public static final String IMG_PATH = SITE_PATH + "images" + File.separator;
+    private static int port;
+    public static String sitePath;
+    public static String imgPath;
+    public static boolean isIndex;
+    public static List<String> acceptList, rejectList;
 
 
     public static void main(String[] args) {
         try
         {
-            List<String> webConf = readXML("myweb.conf");
+            //List<String> webConf = readXML("myweb.conf");
 
-            int port = setPort(args);
+            //int port = setPort(args);
+
+            readXML("src/myweb.conf");
+            System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptList + "\n" + rejectList);
 
             BufferedReader fromClient;
             OutputStream toClient;
@@ -54,8 +60,8 @@ public class HttpServer
                     String path = setPath(data);
 
                     //Send data from server files to client
-                    if (!accessFile(SITE_PATH + path, toClient))
-                        accessFile(IMG_PATH + path , toClient);
+                    if (!accessFile(sitePath + path, toClient))
+                        accessFile(imgPath + path , toClient);
                 }
 
                 //Close connexions
@@ -68,13 +74,14 @@ public class HttpServer
                 System.out.println("Connexion closed with " + cliAdr);
             }
         }
-        catch (ParserConfigurationException | SAXException e)
-        {
-            System.out.println("XML reading error");
-        }
         catch (IOException e)
         {
             System.out.println("In-Out error");
+            //e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -138,8 +145,7 @@ public class HttpServer
         return res;
     }
 
-    public static List<String> readXML(String path) throws ParserConfigurationException, IOException, SAXException {
-        List<String> xmlData = new ArrayList<>();
+    public static void readXML(String path) throws ParserConfigurationException, IOException, SAXException {
         File file = new File(path);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
@@ -151,37 +157,55 @@ public class HttpServer
             if(node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
                 try {
-                    xmlData.add(element.getElementsByTagName("port").item(0).getTextContent());
+                    port = Integer.parseInt(element.getElementsByTagName("port").item(0).getTextContent());
                 } catch (NullPointerException e) {
-                    System.out.println("No port defined");
+                    port = 80;
+                    System.out.println("No port defined, set on port 80.");
                 }
 
+
+                sitePath = element.getElementsByTagName("root").item(0).getTextContent();
+                if (sitePath.equals(""))
+                {
+                    sitePath = "ressource";
+                    System.out.println("No root defined, default used");
+                }
+                sitePath += File.separator;
+                imgPath = sitePath + "images" + File.separator;
+
+                //
                 try {
-                    xmlData.add(element.getElementsByTagName("root").item(0).getTextContent());
-                } catch (NullPointerException e) {
-                    System.out.println("No root defined");
+                    isIndex = Boolean.parseBoolean(element.getElementsByTagName("index").item(0).getTextContent());
+                }
+                catch (NullPointerException e)
+                {
+                    isIndex = false;
+                    System.out.println("No index state defined, set to false.");
                 }
 
-                try {
-                    xmlData.add(element.getElementsByTagName("index").item(0).getTextContent());
-                } catch (NullPointerException e) {
-                    System.out.println("No index defined");
-                }
+                NodeList accepts = element.getElementsByTagName("accepts");
+                acceptList = new ArrayList<>();
+                for (int j = 0 ; j < accepts.getLength() ; j ++)
+                    try {
+                        acceptList.add(accepts.item(j).getTextContent());
+                    }
+                    catch (NullPointerException e)
+                    {
+                        System.out.println("No accepted IPs defined");
+                    }
 
-                try {
-                    xmlData.add(element.getElementsByTagName("accepts").item(0).getTextContent());
-                } catch (NullPointerException e) {
-                    System.out.println("No accepted IPs defined");
-                }
-
-                try {
-                    xmlData.add(element.getElementsByTagName("rejects").item(0).getTextContent());
-                } catch (NullPointerException e) {
-                    System.out.println("No rejected IPs defined");
-                }
+                NodeList rejects = element.getElementsByTagName("rejects");
+                rejectList = new ArrayList<>();
+                for (int j = 0 ; j < accepts.getLength() ; j ++)
+                    try {
+                        rejectList.add(rejects.item(j).getTextContent());
+                    }
+                    catch (NullPointerException e)
+                    {
+                        System.out.println("No rejected IPs defined");
+                    }
             }
         }
-        return xmlData;
     }
 
 }
