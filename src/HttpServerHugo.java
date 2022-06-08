@@ -105,6 +105,9 @@ public class HttpServerHugo
             fis = new FileInputStream(path);
 
             byte[] fileBytes = fis.readAllBytes();
+            if (path.contains("html"))
+                os.write("HTTP/1.1 200 OK".getBytes());
+
             os.write(fileBytes);
             os.flush();
             res = true;
