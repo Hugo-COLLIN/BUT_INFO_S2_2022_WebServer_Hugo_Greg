@@ -149,20 +149,34 @@ public class HttpServer
             Node node = nodeList.item(i);
             if(node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
-                xmlData.add(element.getElementsByTagName("port").item(0).getTextContent());
-                xmlData.add(element.getElementsByTagName("root").item(0).getTextContent());
-                xmlData.add(element.getElementsByTagName("index").item(0).getTextContent());
+                try {
+                    xmlData.add(element.getElementsByTagName("port").item(0).getTextContent());
+                } catch (NullPointerException e) {
+                    System.out.println("No port defined");
+                }
+
+                try {
+                    xmlData.add(element.getElementsByTagName("root").item(0).getTextContent());
+                } catch (NullPointerException e) {
+                    System.out.println("No root defined");
+                }
+
+                try {
+                    xmlData.add(element.getElementsByTagName("index").item(0).getTextContent());
+                } catch (NullPointerException e) {
+                    System.out.println("No index defined");
+                }
 
                 try {
                     xmlData.add(element.getElementsByTagName("accepts").item(0).getTextContent());
                 } catch (NullPointerException e) {
-                    System.out.println("No accepted IP");
+                    System.out.println("No accepted IPs defined");
                 }
 
                 try {
                     xmlData.add(element.getElementsByTagName("rejects").item(0).getTextContent());
                 } catch (NullPointerException e) {
-                    System.out.println("No rejected IP");
+                    System.out.println("No rejected IPs defined");
                 }
             }
         }
