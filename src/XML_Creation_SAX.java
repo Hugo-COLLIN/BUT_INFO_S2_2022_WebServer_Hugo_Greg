@@ -11,19 +11,25 @@ public class XML_Creation_SAX
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser parser = factory.newSAXParser();
-            parser.parse("src/XML_résultat.xml", new DefaultHandler() {
-                public void startDocument() throws SAXException { System.out.println("startDocument"); }
+            parser.parse("src/myweb.conf", new DefaultHandler() {
+                public void startDocument() throws SAXException
+                {
+                    System.out.println("\nstartDocument");
+                }
+
                 public void endDocument() throws SAXException
                 {
-                    System.out.println("endDocument");
+                    System.out.println("\nendDocument");
                 }
+
                 public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
                 {
-                    System.out.println("startElement: " + qName);
+                    System.out.println("\nstartElement: \nqName : " + qName + "\nURI :" + uri + "\nlocalName : " + localName + "\nattributes : " + attributes);
                 }
+
                 public void endElement(String uri, String localName, String qName) throws SAXException
                 {
-                    System.out.println("endElement");
+                    System.out.println("\nendElement");
                 }
             });
         }

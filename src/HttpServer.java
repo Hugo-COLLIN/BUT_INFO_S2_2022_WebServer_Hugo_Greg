@@ -19,8 +19,6 @@ public class HttpServer
 
 
     public static void main(String[] args) {
-
-
         try
         {
             //XML launch
