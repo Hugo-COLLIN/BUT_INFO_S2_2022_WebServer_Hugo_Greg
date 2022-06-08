@@ -8,6 +8,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Hugo COLLIN 20220529
@@ -134,7 +136,9 @@ public class HttpServer
         return res;
     }
 
-    public void readXML(String path) throws Exception {
+    public List<String> readXML(String path) throws Exception
+    {
+        List<String> xmlData = new ArrayList<>();
         File file = new File(path);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
@@ -145,23 +149,24 @@ public class HttpServer
             Node node = nodeList.item(i);
             if(node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
-                System.out.println(element.getElementsByTagName("port").item(0).getTextContent());
-                System.out.println(element.getElementsByTagName("root").item(0).getTextContent());
-                System.out.println(element.getElementsByTagName("index").item(0).getTextContent());
+                xmlData.add(element.getElementsByTagName("port").item(0).getTextContent());
+                xmlData.add(element.getElementsByTagName("root").item(0).getTextContent());
+                xmlData.add(element.getElementsByTagName("index").item(0).getTextContent());
 
                 try {
-                    System.out.println(element.getElementsByTagName("accepts").item(0).getTextContent());
+                    xmlData.add(element.getElementsByTagName("accepts").item(0).getTextContent());
                 } catch (NullPointerException e) {
-                    System.out.println("don't have accepted ip");
+                    System.out.println("No accepted IP");
                 }
 
                 try {
-                    System.out.println(element.getElementsByTagName("rejects").item(0).getTextContent());
+                    xmlData.add(element.getElementsByTagName("rejects").item(0).getTextContent());
                 } catch (NullPointerException e) {
-                    System.out.println("don't have rejected ip");
+                    System.out.println("No rejected IP");
                 }
             }
         }
+        return xmlData;
     }
 
 }
