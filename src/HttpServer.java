@@ -2,70 +2,127 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class HttpServer {
-
-    public static final String RESSOURCEPATH = "ressource" + File.separator;
-
-    public static void main(String[] args) throws IOException {
-        // Initialisation du port
-        int port;
-        try {
-            port = Integer.parseInt(args[0]);
-        } catch (NumberFormatException e) {
-            port = 80;
-            System.out.println("Le parametre n'est pas un nombre");
-        } catch (IndexOutOfBoundsException e) {
-            port = 80;
-        }
+/**
+ * @author Hugo COLLIN 20220529
+ * Note : Fonctionne avec le port 80, mais réponse invalide avec un port personnalisé (ne lance pas d'exception)
+ */
+public class HttpServerHugo
+{
+    public static final String SITE_PATH = "ressource" + File.separator;
+    public static final String IMG_PATH = SITE_PATH + "images" + File.separator;
 
 
-        // Initialisation des flux
-        BufferedReader in;
-        OutputStream out;
+    public static void main(String[] args) {
+        try
+        {
+            int port = setPort(args);
 
-        // Initialisation du socket
-        ServerSocket socketServeur = new ServerSocket(port);
-        Socket socketClient;
-        while (true) {
+            BufferedReader fromClient;
+            OutputStream toClient;
+            String data;
 
-            socketClient = socketServeur.accept();
-            System.out.println("Connexion avec : " + socketClient.getInetAddress());
-            in = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
-            out = socketClient.getOutputStream();
+            while (true) {
+                //Server connexion
+                ServerSocket servSocket = new ServerSocket(port);
+                System.out.println("\nConnected on port " + port + ", pending client request...");
 
+                //Client connexion to server
+                Socket cliSocket = servSocket.accept();
+                String cliAdr = cliSocket.getInetAddress() + ":" + cliSocket.getPort();
+                System.out.println("Client " + cliAdr + " connected");
+                toClient = cliSocket.getOutputStream();
 
-            String line = in.readLine();
+                fromClient = new BufferedReader(
+                        new InputStreamReader(cliSocket.getInputStream())
+                );
 
-            if(line == null) return;
-            boolean isRequest = line.contains("GET");
-            if (!isRequest) return;
+                while ((data = fromClient.readLine()) != null && data.contains("GET"))
+                {
+                    //Process of request path
+                    String path = setPath(data);
 
-            String[] requestSepared = line.split(" ");
+                    //Send data from server files to client
+                    if (!accessFile(SITE_PATH + path, toClient))
+                        accessFile(IMG_PATH + path , toClient);
+                }
 
-            String folder = requestSepared[1];
-            folder = folder.substring("/".length());
+                //Close connexions
+                toClient.close();
+                fromClient.close();
 
-            if(folder.contains("favicon.ico")) continue;
-            for (String s : requestSepared) {
-                System.out.println(s);
+                cliSocket.close();
+                servSocket.close();
+
+                System.out.println("Connexion closed with " + cliAdr);
             }
-
-            System.out.println("folder: "+folder + "\n");
-
-            FileInputStream fis;
-            try {
-                fis = new FileInputStream(RESSOURCEPATH + folder);
-
-                byte[] fileBytes = fis.readAllBytes();
-                if (folder.contains("html"))
-                    out.write("HTTP/1.1 200 OK".getBytes());
-                out.write(fileBytes);
-                out.flush();
-            } catch (FileNotFoundException e) {
-                System.out.println("this file not found so isn't generated");
-            }
-            out.close();
         }
-
+        catch (IOException e)
+        {
+            System.out.println("In-Out error");
+        }
     }
+
+    public static int setPort (String[] args)
+    {
+        int port;
+
+        if (args.length == 0)
+            port = 80;
+        else if (args.length == 1)
+            port = Integer.parseInt(args[0]);
+        else
+            throw new ArrayIndexOutOfBoundsException();
+
+        return port;
+    }
+
+    private static String setPath(String data)
+    {
+        String[] requestSplit = data.split(" ");
+
+        String path = requestSplit[1].substring(File.separator.length());
+        System.out.println("Requested : " + path);
+
+        String [] tmp = path.split("/");
+        if (path.equals(""))
+            path = "index.html";
+        else if (!tmp[tmp.length - 1].contains("."))
+            path += File.separator + "index.html";
+
+        System.out.println("Try to send : " + path);
+        return path;
+    }
+
+
+
+
+    private static boolean accessFile(String path, OutputStream os)
+    {
+        FileInputStream fis;
+        boolean res = false;
+        try
+        {
+            fis = new FileInputStream(path);
+
+            byte[] fileBytes = fis.readAllBytes();
+            if (path.contains("html"))
+                os.write("HTTP/1.1 200 OK".getBytes());
+
+            os.write(fileBytes);
+            os.flush();
+            res = true;
+            System.out.println("Found in " + File.separator + path);
+            System.out.println("Resource sent");
+        }
+        catch (FileNotFoundException e)
+        {
+            System.out.println("Not found in " + File.separator + path);
+        }
+        catch (IOException e)
+        {
+            System.out.println("In-Out error");
+        }
+        return res;
+    }
+
 }
