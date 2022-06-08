@@ -1,3 +1,10 @@
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -131,6 +138,36 @@ public class HttpServer
             System.out.println("In-Out error");
         }
         return res;
+    }
+
+    public void readXML(String path) {
+        File file = new File(path);
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.parse(file);
+        NodeList nodeList = doc.getElementsByTagName("webconf");
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if(node.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) node;
+                System.out.println(element.getElementsByTagName("port").item(0).getTextContent());
+                System.out.println(element.getElementsByTagName("root").item(0).getTextContent());
+                System.out.println(element.getElementsByTagName("index").item(0).getTextContent());
+
+                try {
+                    System.out.println(element.getElementsByTagName("accepts").item(0).getTextContent());
+                } catch (NullPointerException e) {
+                    System.out.println("don't have accepted ip");
+                }
+
+                try {
+                    System.out.println(element.getElementsByTagName("rejects").item(0).getTextContent());
+                } catch (NullPointerException e) {
+                    System.out.println("don't have rejected ip");
+                }
+            }
+        }
     }
 
 }
