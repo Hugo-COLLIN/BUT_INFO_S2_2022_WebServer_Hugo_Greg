@@ -22,9 +22,8 @@ public class HttpServer
     public static String sitePath;
     public static String imgPath;
     public static boolean isIndex;
-    public static List<String> acceptList, rejectList;
+    public static List<String> acceptIPList, rejectIPList;
     public static List<Integer> acceptMaskList, rejectMaskList;
-    private static int port;
 
     public static void main(String[] args) {
         try
@@ -34,7 +33,7 @@ public class HttpServer
             //int port = setPort(args);
 
             readXML(args[0]);
-            System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptList + "\n" + rejectList);
+            System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList);
 
             BufferedReader fromClient;
             OutputStream toClient;
