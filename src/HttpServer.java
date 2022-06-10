@@ -85,20 +85,6 @@ public class HttpServer
         }
     }
 
-    public static int setPort (String[] args)
-    {
-        int port;
-
-        if (args.length == 0)
-            port = 80;
-        else if (args.length == 1)
-            port = Integer.parseInt(args[0]);
-        else
-            throw new ArrayIndexOutOfBoundsException();
-
-        return port;
-    }
-
     private static String setPath(String data)
     {
         String[] requestSplit = data.split(" ");
