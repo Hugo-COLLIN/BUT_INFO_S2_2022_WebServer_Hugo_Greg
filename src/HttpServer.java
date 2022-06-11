@@ -32,7 +32,7 @@ public class HttpServer
 
             //int port = setPort(args);
 
-            readXML(args[0]);
+            readXML(args);
             System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList);
 
             BufferedReader fromClient;
@@ -58,10 +58,13 @@ public class HttpServer
                 {
                     //Process of request path
                     String path = setPath(data);
+                    String [] tmp = path.split("/");
 
                     //Send data from server files to client
                     if (!accessFile(sitePath + path, toClient))
-                        accessFile(imgPath + path , toClient);
+                        if(!accessFile(imgPath + path , toClient))
+                            if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains("."))
+                                accessFile("404.html" , toClient);
                 }
 
                 //Close connexions
@@ -131,8 +134,13 @@ public class HttpServer
         return res;
     }
 
-    public static void readXML(String path) throws ParserConfigurationException, IOException, SAXException {
-        File file = new File(path);
+    public static void readXML(String [] args) throws ParserConfigurationException, IOException, SAXException {
+        File file;
+        if (args.length != 0)
+            file = new File(args[0]);
+        else
+            file = new File("src/myweb.conf");
+
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document doc = db.parse(file);
