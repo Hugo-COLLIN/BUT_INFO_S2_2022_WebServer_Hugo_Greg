@@ -64,7 +64,7 @@ public class HttpServer
                     if (!accessFile(sitePath + path, toClient))
                         if(!accessFile(imgPath + path , toClient))
                             if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains("."))
-                                accessFile("404.html" , toClient);
+                                accessFile(sitePath + "404.html" , toClient);
                 }
 
                 //Close connexions
