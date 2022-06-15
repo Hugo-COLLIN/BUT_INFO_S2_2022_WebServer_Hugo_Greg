@@ -10,6 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class HttpServer
     private static int port;
     public static String sitePath;
     public static String imgPath;
-    public static boolean isIndex;
+    public static boolean isIndex, showIndex;
     public static List<String> acceptIPList, rejectIPList;
     public static List<Integer> acceptMaskList, rejectMaskList;
 
@@ -58,13 +59,19 @@ public class HttpServer
                 {
                     //Process of request path
                     String path = setPath(data);
-                    String [] tmp = path.split("/");
+                    if (showIndex)
+                        generateIndex(toClient);
+                    else
+                    {
+                        String[] tmp = path.split("/");
 
-                    //Send data from server files to client
-                    if (!accessFile(sitePath + path, toClient))
-                        if(!accessFile(imgPath + path , toClient))
-                            if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains("."))
-                                accessFile(sitePath + "404.html" , toClient);
+                        //Send data from server files to client
+                        if (!accessFile(sitePath + path, toClient))
+                            if (!accessFile(imgPath + path, toClient))
+                                errorPage(toClient);
+                                //if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains("."))
+                                // accessFile(sitePath + "404.html" , toClient);
+                    }
                 }
 
                 //Close connexions
@@ -88,6 +95,36 @@ public class HttpServer
         }
     }
 
+    public static void generateIndex (OutputStream os) throws IOException
+    {
+        StringBuilder indexCode = new StringBuilder("<html><head><title>404</title><body><h1>Not found</h1></body>");
+        os.write(indexCode.toString().getBytes());
+        os.flush();
+    }
+
+    private static void errorPage (OutputStream os) throws IOException
+    {
+        os.write("HTTP/1.1 404 ERROR".getBytes());
+        String errorCode = "<html><head><title>404</title><body><h1>Not found</h1></body>";
+        /*String htmlError = "<!doctype html>\n" +
+                "<html lang=\"fr\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <title>Page introuvable</title>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <main>\n" +
+                "        <h1>Erreur 404</h1>\n" +
+                "        <h3>Hé oui, c'est pas de bol !</h3>\n" +
+                "        <p>La page n'existe pas sur le serveur.</p>\n" +
+                "    </main>\n" +
+                "</body>\n" +
+                "</html>";*/
+
+        //os.write("test".getBytes());
+        os.flush();
+    }
+
     private static String setPath(String data)
     {
         String[] requestSplit = data.split(" ");
@@ -96,10 +133,16 @@ public class HttpServer
         System.out.println("Requested : " + path);
 
         String [] tmp = path.split("/");
-        if (path.equals(""))
-            path = "index.html";
-        else if (!tmp[tmp.length - 1].contains("."))
-            path += File.separator + "index.html";
+
+        //if (isIndex && !tmp[tmp.length - 1].contains(".")) showIndex = true;
+
+        //if (isIndex)
+        //else
+            if (path.equals(""))
+               path = "index.html";
+            else if (!tmp[tmp.length - 1].contains("."))
+                path += File.separator + "index.html";
+
 
         System.out.println("Try to send : " + path);
         return path;
@@ -108,6 +151,7 @@ public class HttpServer
     private static boolean accessFile(String path, OutputStream os)
     {
         FileInputStream fis;
+        showIndex = false;
         boolean res = false;
         try
         {
