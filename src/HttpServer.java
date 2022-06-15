@@ -64,7 +64,7 @@ public class HttpServer
                     if (!accessFile(sitePath + path, toClient))
                         if(!accessFile(imgPath + path , toClient))
                             if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains("."))
-                                toClient.write("HTTP/1.1 404 Not Found");
+                                toClient.write("HTTP/1.1 404 Not Found".getBytes());
                 }
 
                 //Close connexions
