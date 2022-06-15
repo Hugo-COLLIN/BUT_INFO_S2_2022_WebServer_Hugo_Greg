@@ -28,9 +28,6 @@ public class HttpServer
     public static void main(String[] args) {
         try
         {
-            //List<String> webConf = readXML("myweb.conf");
-
-            //int port = setPort(args);
 
             readXML(args);
             System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList);
@@ -81,9 +78,7 @@ public class HttpServer
         {
             System.out.println("In-Out error in server");
             //e.printStackTrace();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
+        } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
     }
