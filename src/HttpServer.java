@@ -94,50 +94,61 @@ public class HttpServer
     }
 
     private static boolean isAccepted(InetAddress client) {
-        String temp = client.toString().substring(File.separator.length());
-        String[] numbersCli = temp.split("\\.");
-        String[] masque = getMasque(24).split("\\.");
-        int[] adresseReseau = new int[numbersCli.length];
 
+        if (acceptIPList.isEmpty() || acceptMaskList.isEmpty()) return true;
+
+        String temp = client.toString().substring(File.separator.length()); // Suppression du "/" de debut
+        String[] numbersCli = temp.split("\\."); // Separation des chiffres grace au point
+        String[] masque = getMasque(acceptMaskList.get(0)).split("\\."); // Separation des chiffres grace au point
+        int[] adresseReseau = new int[numbersCli.length]; // Initialisation du tableau
+
+        // Recherche de l'adresse reseaux
         for (int i = 0; i < numbersCli.length; i++) {
-            int numberCli = Integer.parseInt(numbersCli[i]);
-            int nMasque = HttpServer.binaryToInt(masque[i]);
-            adresseReseau[i] = numberCli & nMasque;
+            int numberCli = Integer.parseInt(numbersCli[i]); // Conversion de la chaine en int
+            int nMasque = HttpServer.binaryToInt(masque[i]); // Conversion de la chaine en int
+            adresseReseau[i] = numberCli & nMasque; // Et logique entre le client et le masque
         }
-        boolean accepted = false;
-        for(String s : acceptIPList) {
-            String[] nS = s.split("\\.");
-            for (int i = 0; i < nS.length; i++) {
-                int numberS = Integer.parseInt(nS[i]);
-                if (numberS == adresseReseau[i]) {
-                    accepted = true;
-                } else {
-                    accepted = false;
-                    break;
+
+        boolean accepted = false; // Initialisation
+        for(String s : acceptIPList) { // for each pour parcourir tout la liste des ips accepter
+            String[] nS = s.split("\\."); // Separation des chiffres grace au point
+            for (int i = 0; i < nS.length; i++) { // parcours de chaque chiffres
+                int numberS = Integer.parseInt(nS[i]); // conversion vers un int
+                if (numberS == adresseReseau[i]) { // Si le nombre est equal a l'adresse reseau
+                    accepted = true; // alors il est accepte tant que c'est equal
+                } else { // sinon
+                    accepted = false; // il est refuse
+                    break; // arret de boucle pour eviter qu'accepted depend du dernier chiffre
                 }
             }
-            if (accepted) break;
+            if (accepted) break; // Si l'ip est accepte pas besoin de regarder les autres ip donc arret de boucle
         }
-        return accepted;
+        return accepted; // retourn s'il est accepte ou non
     }
 
-    public static String getMasque(int masque) {
-        if (masque > 32) return null;
-        int nb = 0;
-        final int max = 32;
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < masque; i++) {
-            if(nb == 8) { sb.append("."); nb = 0;}
-            sb.append("1");
-            nb++;
+    /**
+     * permet d'obtenir un masque a partir d'une taille
+     * de la partie reseau
+     * @param partieReseau taille de la partie reseau (ex : 24)
+     * @return retoune le masque en fonction de la partie reseau (ex : 11111111.11111111.11111111.00000000)
+     */
+    public static String getMasque(int partieReseau) {
+        final int max = 32; // init de la taille max du masque
+        if (partieReseau > max) return null; // si la taille de la partie reseau est superieur a la taille max d'un max on s"arrete
+        int nb = 0; // init pour savoir combien de valeur il a ajoute
+        StringBuilder sb = new StringBuilder(); // init string builder
+        for (int i = 0; i < partieReseau; i++) { // ajout de la partie reseau dans le string
+            if(nb == 8) { sb.append("."); nb = 0;} // ajout a point apres 8 ajouts consecutif pour obtenir (12345678.12345678...)
+            sb.append("1"); // ajout des un etant la partie reseau
+            nb++; // incremente nb
         }
 
-        for (int i = 0; i < max-masque; i++) {
-            if(nb == 8) { sb.append("."); nb = 0;}
-            sb.append("0");
-            nb++;
+        for (int i = 0; i < max-partieReseau; i++) { // partie machine
+            if(nb == 8) { sb.append("."); nb = 0;} // mettre un point tout le 8 ajouts
+            sb.append("0"); // ajout d'un 0 etant la partie machine
+            nb++; // incrmeent nb
         }
-        return sb.toString();
+        return sb.toString(); // retourne le string correspondant au masque
     }
 
     private static String setPath(String data)
@@ -158,10 +169,11 @@ public class HttpServer
     }
 
     private static void generateFolderIndex(String path) throws IOException {
-        File folder = new File(path);
-        File[] files = folder.listFiles();
-        FileWriter fw = new FileWriter("./ressource/folder.html");
+        File folder = new File(path); // Recupere le dossier
+        File[] files = folder.listFiles(); // recupere tout les fichiers du dossier
+        FileWriter fw = new FileWriter("./ressource/folder.html"); // permet d'ecriredans le html
 
+        // code html
        // Header
         StringBuilder sb = new StringBuilder("<!DOCTYPE html>\n");
         sb.append("<html lang=\"en\">\n");
@@ -173,38 +185,43 @@ public class HttpServer
         // Body
         sb.append("<body>\n");
         sb.append("\t<ul>\n");
+        // ajout des liens vers chaque fichier
         for(File f : files) {
-            if(f.getName().equals("images")) continue;
-            sb.append("\t\t<li><a href=\""+ f.getName()+ "\">"+f.getName()+"</a></li>\n");
+            if(f.getName().equals("images")) continue; // Si c'est le dossier image il l'affiche pas
+            sb.append("\t\t<li><a href=\""+ f.getName()+ "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
         }
         sb.append("\t</ul>\n");
         sb.append("</body>\n");
         sb.append("</html>");
+        // fin code html
 
-        fw.write(sb.toString());
+        fw.write(sb.toString()); // l'ecrit dans le fichier
 
-        fw.close();
+        fw.close(); // l'enregistre dans le fichier
     }
 
     public static String valueToBinary(int val) {
         // Search in first the power of 2 upper than val
         StringBuilder binary= new StringBuilder();
-        while(val != 0 && val != 1) {
-            binary.append(val % 2);
-            val /= 2;
+        while(val != 0 && val != 1) { // Divise val par 2 tant qu'il n'est pas egal a 0 ou 1
+            binary.append(val % 2); // ajout de 0 ou 1
+            val /= 2; // divise val par deux
         }
-        binary.append(val);
-        binary.reverse();
+        binary.append(val); // ajoute la valeur de val etant la derniere donc 0 ou 1
+        binary.reverse(); // retourne le pour pour passer de 0001 a 1000 pour le chiffre 8
         return binary.toString();
     }
 
     public static int binaryToInt(String binary) {
         int valeur = 0;
+        // parcours toute la chaine de charactere
         for (int i = 0; i < binary.length(); i++) {
-            if (binary.charAt(i) == '1')
-                valeur += Math.pow(2, (binary.length()-1)-i);
+            if (binary.charAt(i) == '1') // si la valeur du char est 1 alors
+                valeur += Math.pow(2, (binary.length()-1)-i); // on ajoute la puissance de deux correspondante
+            // binary.length() -1 car un octect a pour taille 8 mais sa derniere puissance est 7
+            // -i pour aller du point fort au point faible
         }
-        return valeur;
+        return valeur; // retourne la valeur
     }
 
     private static boolean accessFile(String path, OutputStream os)
