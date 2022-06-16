@@ -4,13 +4,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -55,6 +58,11 @@ public class HttpServer
 
                 while ((data = fromClient.readLine()) != null && data.contains("GET"))
                 {
+                    if (!isAccepted(cliSocket.getInetAddress()) ) {
+                        toClient.write("HTTP/1.1 403 Forbidden".getBytes());
+                        System.out.println("forbidden");
+                        break;
+                    }
                     //Process of request path
                     String path = setPath(data);
                     String [] tmp = path.split("/");
@@ -83,6 +91,53 @@ public class HttpServer
         } catch (ParserConfigurationException | SAXException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static boolean isAccepted(InetAddress client) {
+        String temp = client.toString().substring(File.separator.length());
+        String[] numbersCli = temp.split("\\.");
+        String[] masque = getMasque(24).split("\\.");
+        int[] adresseReseau = new int[numbersCli.length];
+
+        for (int i = 0; i < numbersCli.length; i++) {
+            int numberCli = Integer.parseInt(numbersCli[i]);
+            int nMasque = HttpServer.binaryToInt(masque[i]);
+            adresseReseau[i] = numberCli & nMasque;
+        }
+        boolean accepted = false;
+        for(String s : acceptIPList) {
+            String[] nS = s.split("\\.");
+            for (int i = 0; i < nS.length; i++) {
+                int numberS = Integer.parseInt(nS[i]);
+                if (numberS == adresseReseau[i]) {
+                    accepted = true;
+                } else {
+                    accepted = false;
+                    break;
+                }
+            }
+            if (accepted) break;
+        }
+        return accepted;
+    }
+
+    public static String getMasque(int masque) {
+        if (masque > 32) return null;
+        int nb = 0;
+        final int max = 32;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < masque; i++) {
+            if(nb == 8) { sb.append("."); nb = 0;}
+            sb.append("1");
+            nb++;
+        }
+
+        for (int i = 0; i < max-masque; i++) {
+            if(nb == 8) { sb.append("."); nb = 0;}
+            sb.append("0");
+            nb++;
+        }
+        return sb.toString();
     }
 
     private static String setPath(String data)
