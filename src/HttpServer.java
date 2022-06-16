@@ -31,6 +31,7 @@ public class HttpServer
         {
 
             readXML(args);
+            HttpServer.generateFolderIndex(sitePath);
             System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList);
 
             BufferedReader fromClient;
@@ -116,9 +117,12 @@ public class HttpServer
 
         // Body
         sb.append("<body>\n");
+        sb.append("\t<ul>\n");
         for(File f : files) {
-            sb.append("\t<a href=\""+ f.getName()+ "\">"+f.getName()+"</a>\n");
+            if(f.getName().equals("images")) continue;
+            sb.append("\t\t<li><a href=\""+ f.getName()+ "\">"+f.getName()+"</a></li>\n");
         }
+        sb.append("\t</ul>\n");
         sb.append("</body>\n");
         sb.append("</html>");
 
