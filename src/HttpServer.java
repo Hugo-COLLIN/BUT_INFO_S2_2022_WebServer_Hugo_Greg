@@ -131,6 +131,27 @@ public class HttpServer
         fw.close();
     }
 
+    public static String valueToBinary(int val) {
+        // Search in first the power of 2 upper than val
+        StringBuilder binary= new StringBuilder();
+        while(val != 0 && val != 1) {
+            binary.append(val % 2);
+            val /= 2;
+        }
+        binary.append(val);
+        binary.reverse();
+        return binary.toString();
+    }
+
+    public static int binaryToInt(String binary) {
+        int valeur = 0;
+        for (int i = 0; i < binary.length(); i++) {
+            if (binary.charAt(i) == '1')
+                valeur += Math.pow(2, (binary.length()-1)-i);
+        }
+        return valeur;
+    }
+
     private static boolean accessFile(String path, OutputStream os)
     {
         FileInputStream fis;
