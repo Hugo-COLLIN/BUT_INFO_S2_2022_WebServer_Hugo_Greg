@@ -26,6 +26,7 @@ public class HttpServer
     public static List<Integer> acceptMaskList, rejectMaskList;
 
     public static void main(String[] args) {
+
         try
         {
 
@@ -92,12 +93,38 @@ public class HttpServer
 
         String [] tmp = path.split("/");
         if (path.equals(""))
-            path = "index.html";
+            path = "folder.html";
         else if (!tmp[tmp.length - 1].contains("."))
             path += File.separator + "index.html";
 
         System.out.println("Try to send : " + path);
         return path;
+    }
+
+    private static void generateFolderIndex(String path) throws IOException {
+        File folder = new File(path);
+        File[] files = folder.listFiles();
+        FileWriter fw = new FileWriter("./ressource/folder.html");
+
+       // Header
+        StringBuilder sb = new StringBuilder("<!DOCTYPE html>\n");
+        sb.append("<html lang=\"en\">\n");
+        sb.append("<head>\n");
+        sb.append("\t<meta charset=\"UTF-8\">\n");
+        sb.append("\t<title>Title</title>\n");
+        sb.append("</head>\n");
+
+        // Body
+        sb.append("<body>\n");
+        for(File f : files) {
+            sb.append("\t<a href=\""+ f.getName()+ "\">"+f.getName()+"</a>\n");
+        }
+        sb.append("</body>\n");
+        sb.append("</html>");
+
+        fw.write(sb.toString());
+
+        fw.close();
     }
 
     private static boolean accessFile(String path, OutputStream os)
@@ -114,6 +141,7 @@ public class HttpServer
 
             os.write(fileBytes);
             os.flush();
+            os.close();
             res = true;
             System.out.println("Found in " + File.separator + path);
             System.out.println("Resource sent");
