@@ -4,7 +4,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -13,7 +12,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -70,8 +68,11 @@ public class HttpServer
                     //Send data from server files to client
                     if (!accessFile(sitePath + path, toClient))
                         if(!accessFile(imgPath + path , toClient))
-                            if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains("."))
+                            if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains(".")) {
+                                System.out.println("Not found");
                                 toClient.write("HTTP/1.1 404 Not Found".getBytes());
+                                accessFile(sitePath + "folder.html", toClient);
+                            }
                 }
 
                 //Close connexions
@@ -173,12 +174,18 @@ public class HttpServer
         File[] files = folder.listFiles(); // recupere tout les fichiers du dossier
         FileWriter fw = new FileWriter("./ressource/folder.html"); // permet d'ecriredans le html
 
+
+
         // code html
        // Header
-        StringBuilder sb = new StringBuilder("<!DOCTYPE html>\n");
-        sb.append("<html lang=\"en\">\n");
+        StringBuilder sb = new StringBuilder("<html xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n" +
+                "\t  xmlns:w=\"urn:schemas-microsoft-com:office:word\"\n" +
+                "\t  xmlns=\"http://www.w3.org/TR/REC-html40\">\n\n");
         sb.append("<head>\n");
-        sb.append("\t<meta charset=\"UTF-8\">\n");
+        sb.append("\t<meta http-equiv=Content-Type content=\"text/html; charset=windows-1252\">\n" +
+                "\t<meta name=ProgId content=Word.Document>\n" +
+                "\t<meta name=Generator content=\"Microsoft Word 9\">\n" +
+                "\t<meta name=Originator content=\"Microsoft Word 9\">\n");
         sb.append("\t<title>Title</title>\n");
         sb.append("</head>\n");
 
