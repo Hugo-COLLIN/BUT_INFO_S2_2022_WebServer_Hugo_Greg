@@ -103,20 +103,27 @@ public class HttpServer
         String temp = client.toString().substring(File.separator.length());     // Suppression du "/" de debut
 
         String[] numbersCli, masque;
-        if (temp.contains("\\."))
+        int[] adresseReseau;
+        if (temp.contains("\\.")) {
             numbersCli = temp.split("\\.");                               // Separation des chiffres grace au point
-        else
+
+            masque = getMasque(acceptMaskList.get(0)).split("\\.");           // Separation des chiffres grace au point
+            adresseReseau = new int[numbersCli.length];                       // Initialisation du tableau
+
+            // Recherche de l'adresse reseaux
+            for (int i = 0; i < numbersCli.length; i++) {
+                int numberCli = Integer.parseInt(numbersCli[i]);                    // Conversion de la chaine en int
+                int nMasque = HttpServer.binaryToInt(masque[i]);                    // Conversion de la chaine en int
+                adresseReseau[i] = numberCli & nMasque;                             // Et logique entre le client et le masque
+            }
+        }
+        else {
             numbersCli = temp.split(":");
 
-        masque = getMasque(acceptMaskList.get(0)).split("\\.");  // Separation des chiffres grace au point
-        int[] adresseReseau = new int[numbersCli.length];                       // Initialisation du tableau
 
-        // Recherche de l'adresse reseaux
-        for (int i = 0; i < numbersCli.length; i++) {
-            int numberCli = Integer.parseInt(numbersCli[i]);                    // Conversion de la chaine en int
-            int nMasque = HttpServer.binaryToInt(masque[i]);                    // Conversion de la chaine en int
-            adresseReseau[i] = numberCli & nMasque;                             // Et logique entre le client et le masque
+            adresseReseau = new int[numbersCli.length];
         }
+
 
         boolean accepted = false;                                               // Initialisation
         for (String s : acceptIPList) {                                         // for each pour parcourir tout la liste des ips accepter
