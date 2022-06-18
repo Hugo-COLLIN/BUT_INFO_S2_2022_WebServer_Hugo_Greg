@@ -23,6 +23,7 @@ public class HttpServer
     private static int port;
     public static String sitePath;
     public static String imgPath;
+    public  static String actualPath;
     public static boolean isIndex, showIndex;
     public static List<String> acceptIPList, rejectIPList;
     public static List<Integer> acceptMaskList, rejectMaskList;
@@ -38,7 +39,7 @@ public class HttpServer
             BufferedReader fromClient;
             OutputStream toClient;
             String data;
-
+            actualPath = sitePath;
             while (true) {
                 //Server connexion
                 ServerSocket servSocket = new ServerSocket(port);
@@ -63,22 +64,26 @@ public class HttpServer
                     }
                     //Process of request path
                     String path = setPath(data);
-
-                    if(path == null) {
+                    if (path != null && new File(sitePath+path).isDirectory()) {
+                        generateFolderIndex(sitePath+path, toClient);
+                        if (!actualPath.equals(sitePath+path+File.separator))
+                            actualPath += path + File.separator;
+                        continue;
+                    }
+                    else if(path == null) {
                         generateFolderIndex(sitePath, toClient);
                         continue;
                     }
 
                     String [] tmp = path.split("/");
-
+                    System.out.println("Chemin actuel: " + actualPath);
                     //Send data from server files to client
-                    if (!accessFile(sitePath + path, toClient))
+                    if (!accessFile(actualPath + path, toClient))
                         if(!accessFile(imgPath + path , toClient))
                             if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains(".")) {
                                 System.out.println("Not found");
                                 toClient.write("HTTP/1.1 404 Not Found".getBytes());
                                 errorPage(toClient);
-                                //errorPage(toClient);
                             }
                 }
 
@@ -212,13 +217,19 @@ public class HttpServer
         String[] requestSplit = data.split(" ");
 
         String path = requestSplit[1].substring(File.separator.length());
+
+
         System.out.println("Requested : " + path);
 
         String [] tmp = path.split("/");
-        if (path.equals("") && isIndex)
+        if (path.equals("") && isIndex) {
             path = null;
-        else if (path.equals("") && !isIndex)
+            actualPath = sitePath;
+        }
+        else if (path.equals("") && !isIndex) {
             path = "index.html";
+            actualPath = sitePath;
+        }
         else if (!tmp[tmp.length - 1].contains(".") && !isIndex)
             path += File.separator + "index.html";
 
