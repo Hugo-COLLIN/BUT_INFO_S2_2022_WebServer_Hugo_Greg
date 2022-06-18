@@ -23,7 +23,6 @@ public class HttpServer
     private static int port;
     public static String sitePath;
     public static String imgPath;
-    public  static String actualPath;
     public static boolean isIndex, showIndex;
     public static List<String> acceptIPList, rejectIPList;
     public static List<Integer> acceptMaskList, rejectMaskList;
@@ -39,7 +38,6 @@ public class HttpServer
             BufferedReader fromClient;
             OutputStream toClient;
             String data;
-            actualPath = sitePath;
             while (true) {
                 //Server connexion
                 ServerSocket servSocket = new ServerSocket(port);
@@ -66,8 +64,6 @@ public class HttpServer
                     String path = setPath(data);
                     if (path != null && new File(sitePath+path).isDirectory()) {
                         generateFolderIndex(sitePath+path, toClient);
-                        if (!actualPath.equals(sitePath+path+File.separator))
-                            actualPath += path + File.separator;
                         continue;
                     }
                     else if(path == null) {
@@ -76,9 +72,8 @@ public class HttpServer
                     }
 
                     String [] tmp = path.split("/");
-                    System.out.println("Chemin actuel: " + actualPath);
                     //Send data from server files to client
-                    if (!accessFile(actualPath + path, toClient))
+                    if (!accessFile(sitePath + path, toClient))
                         if(!accessFile(imgPath + path , toClient))
                             if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains(".")) {
                                 System.out.println("Not found");
@@ -224,11 +219,9 @@ public class HttpServer
         String [] tmp = path.split("/");
         if (path.equals("") && isIndex) {
             path = null;
-            actualPath = sitePath;
         }
         else if (path.equals("") && !isIndex) {
             path = "index.html";
-            actualPath = sitePath;
         }
         else if (!tmp[tmp.length - 1].contains(".") && !isIndex)
             path += File.separator + "index.html";
