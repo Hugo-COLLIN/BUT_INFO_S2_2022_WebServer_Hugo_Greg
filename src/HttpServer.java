@@ -158,7 +158,7 @@ public class HttpServer
         if (partieReseau > max) return null;        // si la taille de la partie reseau est superieur a la taille max d'un max on s"arrete
         int nb = 0;                                 // init pour savoir combien de valeur il a ajoute
         StringBuilder sb = new StringBuilder();     // init string builder
-        for (int i = 0; i < partieReseau; i++) {    // ajout de la partie reseau dans le string
+        for (int i = 0; i< partieReseau; i++) {    // ajout de la partie reseau dans le string
             if(nb == 8) { sb.append("."); nb = 0;}  // ajout a point apres 8 ajouts consecutif pour obtenir (12345678.12345678...)
             sb.append("1");                         // ajout des un etant la partie reseau
             nb++;                                   // incremente nb
