@@ -101,7 +101,13 @@ public class HttpServer
         if (acceptIPList.isEmpty() || acceptMaskList.isEmpty()) return true;
 
         String temp = client.toString().substring(File.separator.length()); // Suppression du "/" de debut
-        String[] numbersCli = temp.split("\\."); // Separation des chiffres grace au point
+
+        String[] numbersCli;
+        if (temp.contains("\\."))
+            numbersCli = temp.split("\\."); // Separation des chiffres grace au point
+        else
+            numbersCli = temp.split(":");
+
         String[] masque = getMasque(acceptMaskList.get(0)).split("\\."); // Separation des chiffres grace au point
         int[] adresseReseau = new int[numbersCli.length]; // Initialisation du tableau
 
@@ -136,20 +142,20 @@ public class HttpServer
      * @return retoune le masque en fonction de la partie reseau (ex : 11111111.11111111.11111111.00000000)
      */
     public static String getMasque(int partieReseau) {
-        final int max = 32; // init de la taille max du masque
-        if (partieReseau > max) return null; // si la taille de la partie reseau est superieur a la taille max d'un max on s"arrete
-        int nb = 0; // init pour savoir combien de valeur il a ajoute
-        StringBuilder sb = new StringBuilder(); // init string builder
-        for (int i = 0; i < partieReseau; i++) { // ajout de la partie reseau dans le string
-            if(nb == 8) { sb.append("."); nb = 0;} // ajout a point apres 8 ajouts consecutif pour obtenir (12345678.12345678...)
-            sb.append("1"); // ajout des un etant la partie reseau
-            nb++; // incremente nb
+        final int max = 32;                         // init de la taille max du masque
+        if (partieReseau > max) return null;        // si la taille de la partie reseau est superieur a la taille max d'un max on s"arrete
+        int nb = 0;                                 // init pour savoir combien de valeur il a ajoute
+        StringBuilder sb = new StringBuilder();     // init string builder
+        for (int i = 0; i < partieReseau; i++) {    // ajout de la partie reseau dans le string
+            if(nb == 8) { sb.append("."); nb = 0;}  // ajout a point apres 8 ajouts consecutif pour obtenir (12345678.12345678...)
+            sb.append("1");                         // ajout des un etant la partie reseau
+            nb++;                                   // incremente nb
         }
 
-        for (int i = 0; i < max-partieReseau; i++) { // partie machine
-            if(nb == 8) { sb.append("."); nb = 0;} // mettre un point tout le 8 ajouts
-            sb.append("0"); // ajout d'un 0 etant la partie machine
-            nb++; // incrmeent nb
+        for (int i = 0; i < max-partieReseau; i++) {// partie machine
+            if(nb == 8) { sb.append("."); nb = 0;}  // mettre un point tout le 8 ajouts
+            sb.append("0");                         // ajout d'un 0 etant la partie machine
+            nb++;                                   // incrmeent nb
         }
         return sb.toString(); // retourne le string correspondant au masque
     }
