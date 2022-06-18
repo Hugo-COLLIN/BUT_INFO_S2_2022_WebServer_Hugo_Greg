@@ -63,6 +63,12 @@ public class HttpServer
                     }
                     //Process of request path
                     String path = setPath(data);
+
+                    if(path == null) {
+                        generateFolderIndex(sitePath, toClient);
+                        continue;
+                    }
+
                     String [] tmp = path.split("/");
 
                     //Send data from server files to client
@@ -103,7 +109,7 @@ public class HttpServer
 
         String[] numbersCli, masque;
         int[] adresseReseau;
-        if (temp.contains("\\.")) {
+//        if (temp.contains("\\.")) {
             numbersCli = temp.split("\\.");                               // Separation des chiffres grace au point
 
             masque = getMasque(acceptMaskList.get(0)).split("\\.");           // Separation des chiffres grace au point
@@ -115,13 +121,13 @@ public class HttpServer
                 int nMasque = HttpServer.binaryToInt(masque[i]);                    // Conversion de la chaine en int
                 adresseReseau[i] = numberCli & nMasque;                             // Et logique entre le client et le masque
             }
-        }
-        else {
+//        }
+        /*else {
             numbersCli = temp.split(":");
 
 
             adresseReseau = new int[numbersCli.length];
-        }
+        }*/
 
 
         boolean accepted = false;                                               // Initialisation
@@ -210,7 +216,7 @@ public class HttpServer
 
         String [] tmp = path.split("/");
         if (path.equals(""))
-            path = "folder.html";
+            path = null;
         else if (!tmp[tmp.length - 1].contains("."))
             path += File.separator + "index.html";
 
@@ -224,12 +230,11 @@ public class HttpServer
         return path;
     }
 
-    private static void generateFolderIndex(String path) throws IOException {
+    private static void generateFolderIndex(String path, OutputStream os) throws IOException {
         File folder = new File(path); // Recupere le dossier
         File[] files = folder.listFiles(); // recupere tout les fichiers du dossier
-        FileWriter fw = new FileWriter("./ressource/folder.html"); // permet d'ecriredans le html
 
-
+        os.write("HTTP/1.1 202 OK".getBytes());
 
         // code html
        // Header
@@ -256,10 +261,8 @@ public class HttpServer
         sb.append("</body>\n");
         sb.append("</html>");
         // fin code html
-
-        fw.write(sb.toString()); // l'ecrit dans le fichier
-
-        fw.close(); // l'enregistre dans le fichier
+        os.write(sb.toString().getBytes());
+        os.flush();
     }
 
     public static String valueToBinary(int val) {
