@@ -102,13 +102,13 @@ public class HttpServer
 
         String temp = client.toString().substring(File.separator.length());     // Suppression du "/" de debut
 
-        String[] numbersCli;
+        String[] numbersCli, masque;
         if (temp.contains("\\."))
             numbersCli = temp.split("\\.");                               // Separation des chiffres grace au point
         else
             numbersCli = temp.split(":");
 
-        String[] masque = getMasque(acceptMaskList.get(0)).split("\\.");  // Separation des chiffres grace au point
+        masque = getMasque(acceptMaskList.get(0)).split("\\.");  // Separation des chiffres grace au point
         int[] adresseReseau = new int[numbersCli.length];                       // Initialisation du tableau
 
         // Recherche de l'adresse reseaux
@@ -119,7 +119,7 @@ public class HttpServer
         }
 
         boolean accepted = false;                                               // Initialisation
-        for(String s : acceptIPList) {                                          // for each pour parcourir tout la liste des ips accepter
+        for (String s : acceptIPList) {                                         // for each pour parcourir tout la liste des ips accepter
             String[] nS = s.split("\\.");                                 // Separation des chiffres grace au point
             for (int i = 0; i < nS.length; i++) {                               // parcours de chaque chiffres
                 int numberS = Integer.parseInt(nS[i]);                          // conversion vers un int
