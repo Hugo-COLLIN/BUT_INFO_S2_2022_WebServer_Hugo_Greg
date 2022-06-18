@@ -65,7 +65,8 @@ public class HttpServer
                     String path = setPath(data);
 
                     if(path == null) {
-                        generateFolderIndex(sitePath, toClient);
+                        if (isIndex)
+                            generateFolderIndex(sitePath, toClient);
                         continue;
                     }
 
@@ -109,7 +110,7 @@ public class HttpServer
 
         String[] numbersCli, masque;
         int[] adresseReseau;
-//        if (temp.contains("\\.")) {
+        if (temp.contains(".")) {
             numbersCli = temp.split("\\.");                               // Separation des chiffres grace au point
 
             masque = getMasque(acceptMaskList.get(0)).split("\\.");           // Separation des chiffres grace au point
@@ -121,13 +122,13 @@ public class HttpServer
                 int nMasque = HttpServer.binaryToInt(masque[i]);                    // Conversion de la chaine en int
                 adresseReseau[i] = numberCli & nMasque;                             // Et logique entre le client et le masque
             }
-//        }
-        /*else {
+        }
+        else {
             numbersCli = temp.split(":");
 
 
             adresseReseau = new int[numbersCli.length];
-        }*/
+        }
 
 
         boolean accepted = false;                                               // Initialisation
