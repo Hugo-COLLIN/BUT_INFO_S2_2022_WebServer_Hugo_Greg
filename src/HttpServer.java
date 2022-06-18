@@ -65,8 +65,7 @@ public class HttpServer
                     String path = setPath(data);
 
                     if(path == null) {
-                        if (isIndex)
-                            generateFolderIndex(sitePath, toClient);
+                        generateFolderIndex(sitePath, toClient);
                         continue;
                     }
 
@@ -216,9 +215,11 @@ public class HttpServer
         System.out.println("Requested : " + path);
 
         String [] tmp = path.split("/");
-        if (path.equals(""))
+        if (path.equals("") && isIndex)
             path = null;
-        else if (!tmp[tmp.length - 1].contains("."))
+        else if (path.equals("") && !isIndex)
+            path = "index.html";
+        else if (!tmp[tmp.length - 1].contains(".") && !isIndex)
             path += File.separator + "index.html";
 
         //if (isIndex && !tmp[tmp.length - 1].contains(".")) showIndex = true;
