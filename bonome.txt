@@ -1,0 +1,3 @@
+Hugo COLLIN, Grégory DARDENNE, S2B
+
+Il s'agissait de réaliser un mini serveur web avec JavaNET en utilisant le protocole TCP.
