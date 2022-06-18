@@ -33,7 +33,6 @@ public class HttpServer
         {
 
             readXML(args);
-            HttpServer.generateFolderIndex(sitePath);
             System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList);
 
             BufferedReader fromClient;
@@ -72,7 +71,7 @@ public class HttpServer
                             if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains(".")) {
                                 System.out.println("Not found");
                                 toClient.write("HTTP/1.1 404 Not Found".getBytes());
-                                accessFile(sitePath + "folder.html", toClient);
+                                errorPage(toClient);
                                 //errorPage(toClient);
                             }
                 }
@@ -177,23 +176,28 @@ public class HttpServer
     private static void errorPage (OutputStream os) throws IOException
     {
         os.write("HTTP/1.1 404 ERROR".getBytes());
-        String errorCode = "<html><head><title>404</title><body><h1>Not found</h1></body>";
-        /*String htmlError = "<!doctype html>\n" +
-                "<html lang=\"fr\">\n" +
-                "<head>\n" +
-                "    <meta charset=\"UTF-8\">\n" +
-                "    <title>Page introuvable</title>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "    <main>\n" +
-                "        <h1>Erreur 404</h1>\n" +
-                "        <h3>Hé oui, c'est pas de bol !</h3>\n" +
-                "        <p>La page n'existe pas sur le serveur.</p>\n" +
-                "    </main>\n" +
-                "</body>\n" +
-                "</html>";*/
+        StringBuilder sb = new StringBuilder("<html xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n" +
+                "\t  xmlns:w=\"urn:schemas-microsoft-com:office:word\"\n" +
+                "\t  xmlns=\"http://www.w3.org/TR/REC-html40\">\n\n");
+        sb.append("<head>\n");
+        sb.append("\t<meta http-equiv=Content-Type content=\"text/html; charset=windows-1252\">\n" +
+                "\t<meta name=ProgId content=Word.Document>\n" +
+                "\t<meta name=Generator content=\"Microsoft Word 9\">\n" +
+                "\t<meta name=Originator content=\"Microsoft Word 9\">\n");
+        sb.append("\t<title>Title</title>\n");
+        sb.append("\t<style>" +
+                "\t\tstrong{" +
+                "\t\t\tfont-size:2em;" +
+                "}</style>");
+        sb.append("</head>\n");
 
-        //os.write("test".getBytes());
+        // Body
+        sb.append("<body>\n");
+        sb.append("<strong> Error 404 page not found</strong>");
+        sb.append("</body>\n");
+        sb.append("</html>");
+
+        os.write(sb.toString().getBytes());
         os.flush();
     }
 
