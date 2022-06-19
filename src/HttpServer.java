@@ -11,7 +11,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +20,8 @@ import java.util.List;
 public class HttpServer
 {
     private static int port;
-    public static String sitePath;
-    public static String imgPath;
-    public static boolean isIndex, showIndex;
+    public static String sitePath, imgPath, actualPath;
+    public static boolean isIndex;
     public static List<String> acceptIPList, rejectIPList;
     public static List<Integer> acceptMaskList, rejectMaskList;
 
@@ -55,25 +53,24 @@ public class HttpServer
                 while ((data = fromClient.readLine()) != null && data.contains("GET"))
                 {
                     if (!isAccepted(cliSocket.getInetAddress()) ) {
-                        toClient.write("HTTP/1.1 403 Forbidden".getBytes());
-                        System.out.println("Forbidden");
+                        forbiddenPage(toClient);
                         break;
                     }
                     //Process of path request
-                    String path = setPath(data);
-                    if (path != null && new File(sitePath+path).isDirectory()) {
-                        generateFolderIndex(sitePath+path, toClient);
+                    actualPath = setPath(data);
+                    if (actualPath != null && new File(sitePath+actualPath).isDirectory()) {
+                        folderIndexPage(sitePath+actualPath, toClient);
                         continue;
                     }
-                    else if(path == null) {
-                        generateFolderIndex(sitePath, toClient);
+                    else if (actualPath == null) {
+                        folderIndexPage(sitePath, toClient);
                         continue;
                     }
 
-                    String [] tmp = path.split("/");
+                    String [] tmp = actualPath.split("/");
                     //Send data from server files to client
-                    if (!accessFile(sitePath + path, toClient))
-                        if(!accessFile(imgPath + path , toClient))
+                    if (!accessFile(sitePath + actualPath, toClient))
+                        if(!accessFile(imgPath + actualPath , toClient))
                             if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains(".")) {
                                 System.out.println("Not found");
                                 toClient.write("HTTP/1.1 404 Not Found".getBytes());
@@ -95,10 +92,14 @@ public class HttpServer
         {
             System.out.println("In-Out error in server");
             //e.printStackTrace();
-        } catch (ParserConfigurationException | SAXException e) {
-            throw new RuntimeException(e);
+        }
+        catch (ParserConfigurationException | SAXException e)
+        {
+            e.printStackTrace();
         }
     }
+
+
 
     private static boolean isAccepted(InetAddress client) {
 
@@ -207,6 +208,40 @@ public class HttpServer
         os.flush();
     }
 
+
+    private static void forbiddenPage(OutputStream toClient) throws IOException
+    {
+        toClient.write("HTTP/1.1 403 Forbidden".getBytes());
+        System.out.println("Forbidden");
+    }
+
+    private static void folderIndexPage(String path, OutputStream os) throws IOException {
+        File folder = new File(path); // Recupere le dossier
+        File[] files = folder.listFiles(); // recupere tout les fichiers du dossier
+
+        os.write("HTTP/1.1 202 OK".getBytes());
+
+        // code html
+        // Header
+        StringBuilder sb = new StringBuilder("<html>\n\n<head>\n\t<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n");
+        sb.append("\t<title>Index de " + sitePath + "</title>\n</head>\n");
+
+        // Body
+        sb.append("<body>\n");
+        sb.append("\t<ul>\n");
+        // ajout des liens vers chaque fichier
+        for(File f : files) {
+            if(f.getName().equals("images")) continue; // Si c'est le dossier image il l'affiche pas
+            sb.append("\t\t<li><a href=\""+ f.getName()+ "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
+        }
+        sb.append("\t</ul>\n");
+        sb.append("</body>\n");
+        sb.append("</html>");
+        // fin code html
+        os.write(sb.toString().getBytes());
+        os.flush();
+    }
+
     private static String setPath(String data)
     {
         String[] requestSplit = data.split(" ");
@@ -236,33 +271,6 @@ public class HttpServer
         return path;
     }
 
-    private static void generateFolderIndex(String path, OutputStream os) throws IOException {
-        File folder = new File(path); // Recupere le dossier
-        File[] files = folder.listFiles(); // recupere tout les fichiers du dossier
-
-        os.write("HTTP/1.1 202 OK".getBytes());
-
-        // code html
-       // Header
-        StringBuilder sb = new StringBuilder("<html>\n\n<head>\n\t<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n");
-        sb.append("\t<title>Index de " + path + "</title>\n</head>\n");
-
-        // Body
-        sb.append("<body>\n");
-        sb.append("\t<ul>\n");
-        // ajout des liens vers chaque fichier
-        for(File f : files) {
-            if(f.getName().equals("images")) continue; // Si c'est le dossier image il l'affiche pas
-            sb.append("\t\t<li><a href=\""+ f.getName()+ "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
-        }
-        sb.append("\t</ul>\n");
-        sb.append("</body>\n");
-        sb.append("</html>");
-        // fin code html
-        os.write(sb.toString().getBytes());
-        os.flush();
-    }
-
     public static String valueToBinary(int val) {
         // Search in first the power of 2 upper than val
         StringBuilder binary= new StringBuilder();
@@ -290,7 +298,6 @@ public class HttpServer
     private static boolean accessFile(String path, OutputStream os)
     {
         FileInputStream fis;
-        showIndex = false;
         boolean res = false;
         try
         {
