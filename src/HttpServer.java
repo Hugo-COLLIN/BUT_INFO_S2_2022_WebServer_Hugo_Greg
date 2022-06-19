@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Hugo COLLIN 20220608
+ * @author Hugo COLLIN, Gregory DARDENNE, 20220620
  */
 public class HttpServer
 {
@@ -132,8 +132,6 @@ public class HttpServer
         }
         else {
             return true;
-            //numbersCli = temp.split(":");
-            //adresseReseau = new int[numbersCli.length];
         }
 
 
