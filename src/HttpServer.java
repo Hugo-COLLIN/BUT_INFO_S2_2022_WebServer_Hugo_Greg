@@ -20,7 +20,7 @@ import java.util.List;
 public class HttpServer
 {
     private static int port;
-    public static String sitePath, imgPath, actualPath;
+    public static String rootPath, imgPath, actualPath;
     public static boolean isIndex;
     public static List<String> acceptIPList, rejectIPList;
     public static List<Integer> acceptMaskList, rejectMaskList;
@@ -30,7 +30,7 @@ public class HttpServer
         try
         {
             readXML(args);
-            System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList);
+            System.out.println(port + "\n" + rootPath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList);
 
             BufferedReader fromClient;
             OutputStream toClient;
@@ -58,18 +58,19 @@ public class HttpServer
                     }
                     //Process of path request
                     actualPath = setPath(data);
-                    if (actualPath != null && new File(sitePath+actualPath).isDirectory()) {
-                        folderIndexPage(sitePath+actualPath, toClient);
+                    if (actualPath != null && new File(rootPath +actualPath).isDirectory()) {
+                        folderIndexPage(rootPath + actualPath, toClient);
                         continue;
                     }
                     else if (actualPath == null) {
-                        folderIndexPage(sitePath, toClient);
+                        actualPath = "";
+                        folderIndexPage(rootPath, toClient);
                         continue;
                     }
 
                     String [] tmp = actualPath.split("/");
                     //Send data from server files to client
-                    if (!accessFile(sitePath + actualPath, toClient))
+                    if (!accessFile(rootPath + actualPath, toClient))
                         if(!accessFile(imgPath + actualPath , toClient))
                             if (tmp[tmp.length - 1].contains(".html") || !tmp[tmp.length - 1].contains(".")) {
                                 System.out.println("Not found");
@@ -100,7 +101,11 @@ public class HttpServer
     }
 
 
-
+    /**
+     * Verifie si l'adresse du client est dans la liste des adresses acceptees
+     * @param client adresse IP du client
+     * @return si l'adresse est autorisee ou non
+     */
     private static boolean isAccepted(InetAddress client) {
 
         if (acceptIPList.isEmpty() || acceptMaskList.isEmpty()) return true;
@@ -125,8 +130,6 @@ public class HttpServer
         else {
             return true;
             //numbersCli = temp.split(":");
-
-
             //adresseReseau = new int[numbersCli.length];
         }
 
@@ -159,7 +162,7 @@ public class HttpServer
         if (partieReseau > max) return null;        // si la taille de la partie reseau est superieur a la taille max d'un max on s"arrete
         int nb = 0;                                 // init pour savoir combien de valeur il a ajoute
         StringBuilder sb = new StringBuilder();     // init string builder
-        for (int i = 0; i<partieReseau; i++) {    // ajout de la partie reseau dans le string
+        for (int i = 0; i<partieReseau; i++) {      // ajout de la partie reseau dans le string
             if(nb == 8) { sb.append("."); nb = 0;}  // ajout a point apres 8 ajouts consecutif pour obtenir (12345678.12345678...)
             sb.append("1");                         // ajout des un etant la partie reseau
             nb++;                                   // incremente nb
@@ -173,58 +176,55 @@ public class HttpServer
         return sb.toString();                       // retourne le string correspondant au masque
     }
 
-    public static void generateIndex (OutputStream os) throws IOException
-    {
-        StringBuilder indexCode = new StringBuilder("<html><head><title>404</title><body><h1>Not found</h1></body>");
-        os.write(indexCode.toString().getBytes());
-        os.flush();
-    }
 
     private static void errorPage (OutputStream os) throws IOException
     {
         os.write("HTTP/1.1 404 ERROR".getBytes());
-        StringBuilder sb = new StringBuilder("<html xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n" +
-                "\t  xmlns:w=\"urn:schemas-microsoft-com:office:word\"\n" +
-                "\t  xmlns=\"http://www.w3.org/TR/REC-html40\">\n\n");
-        sb.append("<head>\n");
-        sb.append("\t<meta http-equiv=Content-Type content=\"text/html; charset=windows-1252\">\n" +
-                "\t<meta name=ProgId content=Word.Document>\n" +
-                "\t<meta name=Generator content=\"Microsoft Word 9\">\n" +
-                "\t<meta name=Originator content=\"Microsoft Word 9\">\n");
-        sb.append("\t<title>Title</title>\n");
-        sb.append("\t<style>" +
-                "\t\tstrong{" +
-                "\t\t\tfont-size:2em;" +
-                "}</style>");
-        sb.append("</head>\n");
+
+        //Head
+        StringBuilder sb = new StringBuilder(
+                "<!DOCTYPE html>\n<html lang=\"fr\">\n\n<head>\n\t" +
+                "<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n" +
+                "\t<title>Page introuvable</title>\n</head>\n"
+        );
 
         // Body
-        sb.append("<body>\n");
-        sb.append("<strong> Error 404 page not found</strong>");
-        sb.append("</body>\n");
-        sb.append("</html>");
+        sb.append("<body>\n" +
+                "    <main style = \"margin:2em; text-align:center;\">\n" +
+                "        <h1>Erreur 404</h1>\n" +
+                "        <p>Hé oui, c'est pas de bol !</p>\n" +
+                "        <h3>La page n'existe pas sur le serveur.</h3>\n" +
+                "    </main>" +
+                "</body>\n" +
+                "</html>");
 
         os.write(sb.toString().getBytes());
         os.flush();
     }
 
 
-    private static void forbiddenPage(OutputStream toClient) throws IOException
+    private static void forbiddenPage(OutputStream os) throws IOException
     {
-        toClient.write("HTTP/1.1 403 Forbidden".getBytes());
+        os.write("HTTP/1.1 403 Forbidden".getBytes());
+
+        StringBuilder sb = new StringBuilder("<!DOCTYPE html>\n<html lang=\"fr\">\n\n<head>\n\t" +
+                "<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n" +
+                "\t<title>Accès refusé</title>\n</head>\n");
+
+        os.write(sb.toString().getBytes());
         System.out.println("Forbidden");
     }
 
-    private static void folderIndexPage(String path, OutputStream os) throws IOException {
-        File folder = new File(path); // Recupere le dossier
+    private static void folderIndexPage(String globalPath, OutputStream os) throws IOException {
+        File folder = new File(globalPath); // Recupere le dossier
         File[] files = folder.listFiles(); // recupere tout les fichiers du dossier
 
         os.write("HTTP/1.1 202 OK".getBytes());
 
         // code html
         // Header
-        StringBuilder sb = new StringBuilder("<html>\n\n<head>\n\t<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n");
-        sb.append("\t<title>Index de " + sitePath + "</title>\n</head>\n");
+        StringBuilder sb = new StringBuilder("<!DOCTYPE html>\n<html lang=\"fr\">\n\n<head>\n\t<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n");
+        sb.append("\t<title>Index de " + File.separator + actualPath + "</title>\n</head>\n");
 
         // Body
         sb.append("<body>\n");
@@ -232,7 +232,7 @@ public class HttpServer
         // ajout des liens vers chaque fichier
         for(File f : files) {
             if(f.getName().equals("images")) continue; // Si c'est le dossier image il l'affiche pas
-            sb.append("\t\t<li><a href=\""+ f.getName()+ "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
+            sb.append("\t\t<li><a href=\""+ actualPath + File.separator + f.getName() + "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
         }
         sb.append("\t</ul>\n");
         sb.append("</body>\n");
@@ -349,14 +349,14 @@ public class HttpServer
                 }
 
 
-                sitePath = element.getElementsByTagName("root").item(0).getTextContent();
-                if (sitePath.equals(""))
+                rootPath = element.getElementsByTagName("root").item(0).getTextContent();
+                if (rootPath.equals(""))
                 {
-                    sitePath = "ressource";
+                    rootPath = "ressource";
                     System.out.println("No root defined, default used");
                 }
-                sitePath += File.separator;
-                imgPath = sitePath + "images" + File.separator;
+                rootPath += File.separator;
+                imgPath = rootPath + "images" + File.separator;
 
                 //
                 try {
