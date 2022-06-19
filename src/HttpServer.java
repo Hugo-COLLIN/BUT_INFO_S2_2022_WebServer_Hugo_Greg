@@ -56,6 +56,8 @@ public class HttpServer
                         forbiddenPage(toClient);
                         break;
                     }
+
+                    System.out.println("root path actual: "+rootPath);
                     //Process of path request
                     actualPath = setPath(data);
                     if (actualPath != null && new File(rootPath +actualPath).isDirectory()) {
@@ -253,8 +255,16 @@ public class HttpServer
 
         // ajout des liens vers chaque fichier
         for (File f : files) {
+
+            String[] element = f.getPath().split("/");
+            String path = "";
+            if (element.length > 2)
+                path = element[element.length-2] + "/" + element[element.length-1];
+            else if (element.length > 1)
+                path = element[element.length-1];
+
             if(f.getName().equals("images")) continue; // Si c'est le dossier image il l'affiche pas
-            sb.append("\t\t<li><a href=\""+ actualPath + "/" + f.getName() + "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
+            sb.append("\t\t<li><a href=\""+ path + "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
         }
         sb.append("         </ul>\n" +
                 "        <section>\n" +
