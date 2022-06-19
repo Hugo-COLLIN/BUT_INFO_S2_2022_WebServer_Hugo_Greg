@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class HttpServer
 {
+    private static final String START_PATH = "/usr/local/bin/myweb/";
     private static int port;
     public static String rootPath, imgPath, actualPath;
     public static boolean isIndex;
@@ -256,11 +257,13 @@ public class HttpServer
         // ajout des liens vers chaque fichier
         for (File f : files) {
 
+            String[] startSize = START_PATH.split("/");
+
             String[] element = f.getPath().split("/");
             String path = "";
-            if (element.length > 2)
+            if (element.length > startSize.length+2)
                 path = element[element.length-2] + "/" + element[element.length-1];
-            else if (element.length > 1)
+            else if (element.length > startSize.length+1)
                 path = element[element.length-1];
 
             if(f.getName().equals("images")) continue; // Si c'est le dossier image il l'affiche pas
@@ -383,10 +386,10 @@ public class HttpServer
                 }
 
 
-                rootPath = element.getElementsByTagName("root").item(0).getTextContent();
-                if (rootPath.equals(""))
+                rootPath = START_PATH + element.getElementsByTagName("root").item(0).getTextContent();
+                if (rootPath.equals(START_PATH))
                 {
-                    rootPath = "ressource";
+                    rootPath = START_PATH + "ressource";
                     System.out.println("No root defined, default used");
                 }
                 rootPath += File.separator;
