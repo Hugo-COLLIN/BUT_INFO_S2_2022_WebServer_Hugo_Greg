@@ -27,11 +27,10 @@ public class HttpServer
     public static List<String> acceptIPList, rejectIPList;
     public static List<Integer> acceptMaskList, rejectMaskList;
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args)
+    {
         try
         {
-
             readXML(args);
             System.out.println(port + "\n" + sitePath + "\n" + isIndex + "\n" + acceptIPList + "\n" + rejectIPList);
 
@@ -57,10 +56,10 @@ public class HttpServer
                 {
                     if (!isAccepted(cliSocket.getInetAddress()) ) {
                         toClient.write("HTTP/1.1 403 Forbidden".getBytes());
-                        System.out.println("forbidden");
+                        System.out.println("Forbidden");
                         break;
                     }
-                    //Process of request path
+                    //Process of path request
                     String path = setPath(data);
                     if (path != null && new File(sitePath+path).isDirectory()) {
                         generateFolderIndex(sitePath+path, toClient);
@@ -123,10 +122,11 @@ public class HttpServer
             }
         }
         else {
-            numbersCli = temp.split(":");
+            return true;
+            //numbersCli = temp.split(":");
 
 
-            adresseReseau = new int[numbersCli.length];
+            //adresseReseau = new int[numbersCli.length];
         }
 
 
@@ -244,16 +244,8 @@ public class HttpServer
 
         // code html
        // Header
-        StringBuilder sb = new StringBuilder("<html xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n" +
-                "\t  xmlns:w=\"urn:schemas-microsoft-com:office:word\"\n" +
-                "\t  xmlns=\"http://www.w3.org/TR/REC-html40\">\n\n");
-        sb.append("<head>\n");
-        sb.append("\t<meta http-equiv=Content-Type content=\"text/html; charset=windows-1252\">\n" +
-                "\t<meta name=ProgId content=Word.Document>\n" +
-                "\t<meta name=Generator content=\"Microsoft Word 9\">\n" +
-                "\t<meta name=Originator content=\"Microsoft Word 9\">\n");
-        sb.append("\t<title>Title</title>\n");
-        sb.append("</head>\n");
+        StringBuilder sb = new StringBuilder("<html>\n\n<head>\n\t<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n");
+        sb.append("\t<title>Index de " + path + "</title>\n</head>\n");
 
         // Body
         sb.append("<body>\n");
