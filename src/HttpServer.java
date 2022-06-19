@@ -183,18 +183,21 @@ public class HttpServer
 
         //Head
         StringBuilder sb = new StringBuilder(
-                "<!DOCTYPE html>\n<html lang=\"fr\">\n\n<head>\n\t" +
-                "<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n" +
-                "\t<title>Page introuvable</title>\n</head>\n"
+                "<!DOCTYPE html>\n<html lang=\"fr\">\n\n<head>\n" +
+                "\t<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n" +
+                "\t<title>Page introuvable</title>\n" +
+                "</head>\n"
         );
 
         // Body
         sb.append("<body>\n" +
                 "    <main style = \"margin:2em; text-align:center;\">\n" +
+                "        <section>\n" +
                 "        <h1>Erreur 404</h1>\n" +
                 "        <p>Hé oui, c'est pas de bol !</p>\n" +
                 "        <h3>La page n'existe pas sur le serveur.</h3>\n" +
-                "    </main>" +
+                "        </section>\n" +
+                "    </main>\n" +
                 "</body>\n" +
                 "</html>");
 
@@ -211,6 +214,18 @@ public class HttpServer
                 "<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n" +
                 "\t<title>Accès refusé</title>\n</head>\n");
 
+        // Body
+        sb.append("<body>\n" +
+                "    <main style = \"margin:2em; text-align:center;\">\n" +
+                "        <section>\n" +
+                "        <h1>Erreur 403</h1>\n" +
+                "        <p>On ne passe pas !</p>\n" +
+                "        <h3>Vous n'avez pas l'autorisation d'accéder à ce fichier.</h3>\n" +
+                "        </section>\n" +
+                "    </main>\n" +
+                "</body>\n" +
+                "</html>");
+
         os.write(sb.toString().getBytes());
         System.out.println("Forbidden");
     }
@@ -223,20 +238,28 @@ public class HttpServer
 
         // code html
         // Header
-        StringBuilder sb = new StringBuilder("<!DOCTYPE html>\n<html lang=\"fr\">\n\n<head>\n\t<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n");
-        sb.append("\t<title>Index de " + File.separator + actualPath + "</title>\n</head>\n");
+        StringBuilder sb = new StringBuilder("<!DOCTYPE html>\n" +
+                "<html lang=\"fr\">\n\n" +
+                "<head>\n\t" +
+                "<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n" +
+                "\t<title>Index de " + File.separator + actualPath + "</title>\n</head>\n");
 
         // Body
-        sb.append("<body>\n");
-        sb.append("\t<ul>\n");
+        sb.append("<body>\n" +
+                "    <main style = \"margin:2em;\">\n" +
+                "        <section>\n" +
+                "           <ul style = \"list-style:none;\">\n");
+
         // ajout des liens vers chaque fichier
-        for(File f : files) {
+        for (File f : files) {
             if(f.getName().equals("images")) continue; // Si c'est le dossier image il l'affiche pas
             sb.append("\t\t<li><a href=\""+ actualPath + File.separator + f.getName() + "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
         }
-        sb.append("\t</ul>\n");
-        sb.append("</body>\n");
-        sb.append("</html>");
+        sb.append("         </ul>\n" +
+                "        <section>\n" +
+                "</main>\n" +
+                "</body>\n" +
+                "</html>");
         // fin code html
         os.write(sb.toString().getBytes());
         os.flush();
