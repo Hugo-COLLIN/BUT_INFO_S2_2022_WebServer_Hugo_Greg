@@ -193,9 +193,9 @@ public class HttpServer
         sb.append("<body>\n" +
                 "    <main style = \"margin:2em; text-align:center;\">\n" +
                 "        <section>\n" +
-                "        <h1>Erreur 404</h1>\n" +
+                "        <h1>404 - Not found</h1>\n" +
                 "        <p>Hé oui, c'est pas de bol !</p>\n" +
-                "        <h3>La page n'existe pas sur le serveur.</h3>\n" +
+                "        <h3>La page demandée n'existe pas sur ce serveur.</h3>\n" +
                 "        </section>\n" +
                 "    </main>\n" +
                 "</body>\n" +
@@ -218,9 +218,9 @@ public class HttpServer
         sb.append("<body>\n" +
                 "    <main style = \"margin:2em; text-align:center;\">\n" +
                 "        <section>\n" +
-                "        <h1>Erreur 403</h1>\n" +
+                "        <h1>403 - Forbidden</h1>\n" +
                 "        <p>On ne passe pas !</p>\n" +
-                "        <h3>Vous n'avez pas l'autorisation d'accéder à ce fichier.</h3>\n" +
+                "        <h3>Vous n'avez pas l'autorisation d'accéder à cette ressource.</h3>\n" +
                 "        </section>\n" +
                 "    </main>\n" +
                 "</body>\n" +
@@ -242,7 +242,7 @@ public class HttpServer
                 "<html lang=\"fr\">\n\n" +
                 "<head>\n\t" +
                 "<meta http-equiv=Content-Type content=\"text/html; charset=utf-8\">\n" +
-                "\t<title>Index de " + File.separator + actualPath + "</title>\n</head>\n");
+                "\t<title>Index de /" + actualPath + "</title>\n</head>\n");
 
         // Body
         sb.append("<body>\n" +
@@ -253,7 +253,7 @@ public class HttpServer
         // ajout des liens vers chaque fichier
         for (File f : files) {
             if(f.getName().equals("images")) continue; // Si c'est le dossier image il l'affiche pas
-            sb.append("\t\t<li><a href=\""+ actualPath + File.separator + f.getName() + "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
+            sb.append("\t\t<li><a href=\""+ actualPath + "/" + f.getName() + "\">"+f.getName()+"</a></li>\n"); // ajout du lien entre chaque fichier
         }
         sb.append("         </ul>\n" +
                 "        <section>\n" +
