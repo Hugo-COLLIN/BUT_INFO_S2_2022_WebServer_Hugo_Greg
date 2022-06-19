@@ -248,7 +248,8 @@ public class HttpServer
         sb.append("<body>\n" +
                 "    <main style = \"margin:2em;\">\n" +
                 "        <section>\n" +
-                "           <ul style = \"list-style:none;\">\n");
+                "           <h1>Index de /" + actualPath + "</h1>" +
+                "           <ul style = \"list-style:none; margin : 1em;\">\n");
 
         // ajout des liens vers chaque fichier
         for (File f : files) {
